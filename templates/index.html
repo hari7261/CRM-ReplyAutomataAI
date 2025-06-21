@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Support Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Support Tickets</h1>
+        
+        <!-- New Ticket Form -->
+        <form action="/create_ticket" method="POST" class="ticket-form">
+            <h2>Create New Ticket</h2>
+            <input type="text" name="customer_name" placeholder="Customer Name" required>
+            <input type="email" name="email" placeholder="Email (Optional)">
+            <textarea name="issue" placeholder="Describe the issue..." required></textarea>
+            <button type="submit">Submit Ticket</button>
+        </form>
+
+        <!-- List of Tickets -->
+        <div class="ticket-list">
+            <h2>Recent Tickets</h2>
+            {% if tickets %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Issue</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>{{ ticket[0] }}</td>
+                            <td>{{ ticket[1] }}</td>
+                            <td>{{ ticket[3][:50] }}...</td>
+                            <td>{{ ticket[4] }}</td>
+                            <td><a href="/ticket/{{ ticket[0] }}">View</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No tickets yet. Submit one above!</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

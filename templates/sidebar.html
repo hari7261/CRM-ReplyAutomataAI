@@ -1,0 +1,44 @@
+<!-- Sidebar Component -->
+<div class="bg-blue-800 text-white w-64 p-4 flex flex-col">
+    <h1 class="text-xl font-bold mb-8">Support System</h1>
+    
+    <div class="mb-6">
+        <div class="flex items-center mb-4">
+            <div class="bg-blue-600 rounded-full w-10 h-10 flex items-center justify-center">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="ml-3">
+                <p class="font-medium">{{ session.name }}</p>
+                <p class="text-xs text-blue-200">{{ session.role|capitalize }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <nav class="flex-1">
+        <a href="/" class="flex items-center py-2 px-4 {% if request.path == '/' %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-lg mb-2">
+            <i class="fas fa-tachometer-alt mr-3"></i>
+            Dashboard
+        </a>
+        <a href="/tickets" class="flex items-center py-2 px-4 {% if request.path.startswith('/tickets') %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-lg mb-2">
+            <i class="fas fa-ticket-alt mr-3"></i>
+            Tickets
+        </a>
+        <a href="/create_ticket" class="flex items-center py-2 px-4 {% if request.path == '/create_ticket' %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-lg mb-2">
+            <i class="fas fa-plus-circle mr-3"></i>
+            Create Ticket
+        </a>
+        {% if session.role == 'manager' %}
+        <a href="/agents" class="flex items-center py-2 px-4 {% if request.path == '/agents' %}bg-blue-700{% else %}hover:bg-blue-700{% endif %} rounded-lg mb-2">
+            <i class="fas fa-users mr-3"></i>
+            Agents
+        </a>
+        {% endif %}
+    </nav>
+    
+    <div class="mt-auto">
+        <a href="/logout" class="flex items-center py-2 px-4 hover:bg-blue-700 rounded-lg">
+            <i class="fas fa-sign-out-alt mr-3"></i>
+            Logout
+        </a>
+    </div>
+</div>

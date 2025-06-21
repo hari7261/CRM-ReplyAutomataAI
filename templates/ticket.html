@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket #{{ ticket[0] }} - Support System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        {% include 'sidebar.html' %}
+        
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto p-8">
+            <div class="max-w-4xl mx-auto">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold">Ticket #{{ ticket[0] }}</h1>
+                        <p class="text-gray-600">{{ ticket[1] }}</p>
+                    </div>
+                    <div class="flex space-x-3">
+                        {% if session.role == 'manager' %}
+                        <button id="openEmailModal" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" {% if not ticket[2] %}disabled style="opacity:0.5;cursor:not-allowed;"{% endif %}>
+                            <i class="fas fa-paper-plane mr-2"></i>Send Email
+                        </button>
+                        {% endif %}
+                        <a href="/tickets" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Tickets
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Ticket Details -->
+                <div class="bg-white rounded-lg shadow mb-6 p-6">
+                    <h2 class="text-lg font-semibold mb-4">Ticket Details</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Customer Name</label>
+                            <p class="text-gray-900">{{ ticket[1] }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <p class="text-gray-900">{{ ticket[2] or "Not provided" }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status</label>
+                            <span class="px-2 py-1 text-xs rounded-full 
+                                {% if ticket[4] == 'Open' %}bg-blue-100 text-blue-800
+                                {% elif ticket[4] == 'Escalated' %}bg-red-100 text-red-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ ticket[4] }}
+                            </span>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Category</label>
+                            <p class="text-gray-900">{{ ticket[5] or "Not categorized" }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Priority</label>
+                            <p class="text-gray-900">
+                                {% if ticket[7] == 1 %}High{% elif ticket[7] == 2 %}Medium{% else %}Low{% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Created</label>
+                            <p class="text-gray-900">{{ ticket[10] }}</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Issue Description</label>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            {{ ticket[3] }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversation History -->
+                {% if conversations %}
+                <div class="bg-white rounded-lg shadow mb-6 p-6">
+                    <h2 class="text-lg font-semibold mb-4">Conversation History</h2>
+                    <div class="space-y-4">
+                        {% for conv in conversations %}
+                        <div class="{% if conv[2] == 'customer' %}bg-blue-50 border-l-4 border-blue-400{% else %}bg-green-50 border-l-4 border-green-400{% endif %} p-4 rounded">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-medium">
+                                    {% if conv[2] == 'customer' %}Customer{% else %}Agent{% endif %}
+                                </span>
+                                <span class="text-sm text-gray-500">{{ conv[4] }}</span>
+                            </div>
+                            <p class="text-gray-700">{{ conv[3] }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Email History -->
+                {% if email_logs %}
+                <div class="bg-white rounded-lg shadow mb-6 p-6">
+                    <h2 class="text-lg font-semibold mb-4">
+                        <i class="fas fa-envelope mr-2 text-blue-600"></i>Email History
+                    </h2>
+                    <div class="space-y-4">
+                        {% for email in email_logs %}
+                        <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded">
+                            <div class="flex justify-between items-center mb-2">
+                                <div>
+                                    <span class="font-medium text-purple-800">Email Sent</span>
+                                    <span class="text-sm text-gray-600 ml-2">to {{ email[2] }}</span>
+                                </div>
+                                <div class="text-sm text-gray-500">
+                                    <span>{{ email[6] }}</span>
+                                    {% if email[8] %}
+                                        <span class="ml-2">by {{ email[8] }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <span class="text-sm font-medium text-gray-700">Subject:</span>
+                                <span class="text-sm text-gray-600">{{ email[3] }}</span>
+                            </div>
+                            <div class="text-sm text-gray-700">
+                                <span class="font-medium">Message:</span>
+                                <div class="mt-1 bg-white p-3 rounded border">
+                                    {{ email[4][:200] }}{% if email[4]|length > 200 %}...{% endif %}
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <span class="px-2 py-1 text-xs rounded-full 
+                                    {% if email[7] == 'sent' %}bg-green-100 text-green-800
+                                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                    {{ email[7].title() }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- AI Response -->
+                {% if ai_reply %}
+                <div class="bg-white rounded-lg shadow mb-6 p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold">AI-Generated Response</h2>
+                        <button id="useAiResponse" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700">
+                            <i class="fas fa-envelope mr-1"></i>Use in Email
+                        </button>
+                    </div>
+                    <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                        <p class="text-gray-700">{{ ai_reply }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Assignment -->
+                {% if session.role == 'manager' %}
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <h2 class="text-lg font-semibold mb-4">Assignment</h2>
+                    <form method="POST" action="/assign_ticket/{{ ticket[0] }}">
+                        <div class="flex items-center space-x-4">
+                            <select name="assigned_to" class="border rounded-lg px-3 py-2">
+                                <option value="">Unassigned</option>
+                                {% for agent in agents %}
+                                <option value="{{ agent[0] }}" {% if agent[0] == ticket[8] %}selected{% endif %}>
+                                    {{ agent[1] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                Assign
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Modal -->
+    <div id="emailModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg relative">
+            <button id="closeEmailModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-xl font-semibold mb-4">Send Email to {{ ticket[1] }}</h2>
+            <form method="POST" action="/send_email/{{ ticket[0] }}">
+                <input type="hidden" name="ticket_id" value="{{ ticket[0] }}">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">To</label>
+                    <input type="email" name="recipient_email" value="{{ ticket[2] or '' }}" class="w-full border rounded-lg px-3 py-2 mt-1" required {% if not ticket[2] %}readonly{% endif %}>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Subject</label>
+                    <input type="text" name="subject" value="Regarding your support ticket #{{ ticket[0] }}" class="w-full border rounded-lg px-3 py-2 mt-1" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Body</label>
+                    <textarea name="body" rows="8" class="w-full border rounded-lg px-3 py-2 mt-1" required>Dear {{ ticket[1] }},
+
+Thank you for contacting our support team regarding your issue. 
+
+{% if ai_reply %}{{ ai_reply }}{% endif %}
+
+Best regards,
+{{ session.username }}
+Support Team</textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancelEmail" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">Cancel</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-paper-plane mr-2"></i>Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal elements
+            const openModalBtn = document.getElementById('openEmailModal');
+            const closeModalBtn = document.getElementById('closeEmailModal');
+            const cancelBtn = document.getElementById('cancelEmail');
+            const emailModal = document.getElementById('emailModal');
+            const useAiResponseBtn = document.getElementById('useAiResponse');
+            const emailBodyTextarea = document.querySelector('textarea[name="body"]');
+
+            // Open modal
+            if (openModalBtn) {
+                openModalBtn.addEventListener('click', function() {
+                    if (openModalBtn.disabled) {
+                        alert('Cannot send email: Customer email not provided for this ticket.');
+                        return;
+                    }
+                    emailModal.classList.remove('hidden');
+                });
+            }
+
+            // Close modal
+            const closeModal = () => emailModal.classList.add('hidden');
+            
+            if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+            if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+            // Close modal on outside click
+            if (emailModal) {
+                emailModal.addEventListener('click', function(e) {
+                    if (e.target === emailModal) {
+                        closeModal();
+                    }
+                });
+            }
+
+            // Use AI Response in email
+            if (useAiResponseBtn && emailBodyTextarea) {
+                useAiResponseBtn.addEventListener('click', function() {
+                    const aiResponse = `{{ ai_reply }}`;
+                    emailBodyTextarea.value = `Dear {{ ticket[1] }},
+
+Thank you for contacting our support team regarding your issue. 
+
+${aiResponse}
+
+Best regards,
+{{ session.username }}
+Support Team`;
+                    emailModal.classList.remove('hidden');
+                });
+            }
+
+            // Disable email button if no email
+            const emailInput = document.querySelector('input[name="recipient_email"]');
+            if (emailInput && !emailInput.value) {
+                emailInput.addEventListener('input', function() {
+                    openModalBtn.disabled = !this.value;
+                    openModalBtn.style.opacity = this.value ? '1' : '0.5';
+                    openModalBtn.style.cursor = this.value ? 'pointer' : 'not-allowed';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
