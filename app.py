@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
 # Configure Gemini API
-genai.configure(api_key='AIzaSyD8sGezvKsCuU5HefKClMCmMw5_TUELlu4')
+genai.configure(api_key='YOUR-API-KEY')
 model = genai.GenerativeModel('gemini-2.0-flash')
 
 # Database Initialization
